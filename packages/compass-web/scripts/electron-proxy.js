@@ -381,7 +381,8 @@ expressProxy.use('/authenticate', limiter, async (req, res) => {
     res.send(JSON.stringify({ projectId }));
   } catch (err) {
     res.statusCode = 500;
-    res.send(err.stack ?? err.message);
+    console.error("Exception occurred:", err.stack);
+    res.send("An internal server error occurred");
   }
   res.end();
 });
@@ -412,7 +413,8 @@ expressProxy.use('/x509', limiter, async (req, res) => {
     res.send(cert);
   } catch (err) {
     res.statusCode = 500;
-    res.send(err.stack ?? err.message);
+    console.error("Exception occurred:", err.stack);
+    res.send("An internal server error occurred");
   }
   res.end();
 });
@@ -434,7 +436,8 @@ expressProxy.use('/projectId', limiter, async (req, res) => {
     }
   } catch (err) {
     res.statusCode = 500;
-    res.send(err.stack ?? err.message);
+    console.error("Exception occurred:", err.stack);
+    res.send("An internal server error occurred");
   }
   res.end();
 });
