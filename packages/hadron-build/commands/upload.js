@@ -7,7 +7,7 @@
 // eslint-disable-next-line strict
 'use strict';
 const path = require('path');
-const os = require('os');
+const tmp = require('tmp');
 const { promises: fs } = require('fs');
 const { deepStrictEqual } = require('assert');
 const { Octokit } = require('@octokit/rest');
@@ -183,10 +183,8 @@ async function publishGitHubRelease(assets, version, channel, dryRun) {
 
   const versionManifest = generateVersionsForAssets(assets, version, channel);
 
-  const versionManifestPath = path.join(
-    os.tmpdir(),
-    `version-manifest-${version}-${Date.now()}.json`
-  );
+  const tmpFile = tmp.fileSync({ prefix: `version-manifest-${version}-`, postfix: '.json' });
+  const versionManifestPath = tmpFile.name;
 
   await fs.writeFile(
     versionManifestPath,
