@@ -1,4 +1,5 @@
 import { shell, app } from 'electron';
+import * as shellQuote from 'shell-quote';
 import { URL, URLSearchParams } from 'url';
 import type { AuthFlowType, MongoDBOIDCPlugin } from '@mongodb-js/oidc-plugin';
 import {
@@ -110,7 +111,8 @@ export class CompassAuthService {
       // `browserCommandForOIDCAuth` preference (which will cause loosing
       // internal plugin auth state), we copy oidc-plugin `openBrowser.command`
       // option handling to our openExternal method
-      const child = spawn(browserCommandForOIDCAuth, [url], {
+      const escapedUrl = shellQuote.quote([url]);
+      const child = spawn(browserCommandForOIDCAuth, [escapedUrl], {
         shell: true,
         stdio: 'ignore',
         detached: true,
