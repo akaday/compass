@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 # Third Party Notices
+=======
+The following third-party software is used by and included in **Mongodb Compass**.
+This document was automatically generated on Mon Nov 25 2024.
+>>>>>>> a7570eed9d61fae8cb4798aa98343bc4e9aa966f
 
 This document contains third party notices for open source software components used in this project.
 

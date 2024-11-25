@@ -1,6 +1,10 @@
 # Compass Tracking Plan
 
+<<<<<<< HEAD
 Generated on Sun, Nov 24, 2024 at 03:33 AM
+=======
+Generated on Mon, Nov 25, 2024 at 04:39 PM
+>>>>>>> a7570eed9d61fae8cb4798aa98343bc4e9aa966f
 
 ## Table of Contents
 
