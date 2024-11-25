@@ -19,6 +19,7 @@ import {
   type LgTableRowType,
 } from '@mongodb-js/compass-components';
 import type { ShardZoneData } from '../store/reducer';
+import { ShardZonesDescription } from './shard-zones-description';
 
 const containerStyles = css({
   height: '400px',
@@ -122,7 +123,7 @@ export function ShardZonesTable({
 
   const handleSearchTextChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      tableRef.current.setGlobalFilter(e.currentTarget.value);
+      tableRef.current.setGlobalFilter(e.currentTarget?.value || '');
     },
     [tableRef]
   );
@@ -131,6 +132,7 @@ export function ShardZonesTable({
 
   return (
     <>
+      <ShardZonesDescription />
       <SearchInput
         value={searchText}
         onChange={handleSearchTextChange}

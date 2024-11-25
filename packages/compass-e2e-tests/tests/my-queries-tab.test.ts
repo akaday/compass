@@ -15,8 +15,8 @@ import type { QueryOptions } from '../helpers/commands';
 import type { Compass } from '../helpers/compass';
 import * as Selectors from '../helpers/selectors';
 import { createNumbersCollection } from '../helpers/insert-data';
-
 import { MongoClient } from 'mongodb';
+import { context as runnerContext } from '../helpers/test-runner-context';
 
 async function openMenuForQueryItem(
   browser: CompassBrowser,
@@ -221,7 +221,7 @@ describe('My Queries tab', function () {
         // copy to clipboard
         await browser.clickVisible(Selectors.SavedItemMenuItemCopy);
 
-        if (process.env.COMPASS_E2E_DISABLE_CLIPBOARD_USAGE !== 'true') {
+        if (!runnerContext.disableClipboardUsage) {
           await browser.waitUntil(
             async () => {
               const text = (await clipboard.read())
@@ -301,11 +301,9 @@ describe('My Queries tab', function () {
         await openMenuForQueryItem(browser, newFavoriteQueryName);
 
         // delete it
-        await browser.clickVisible(Selectors.SavedItemMenuItemDelete);
-        const deleteModal = await browser.$(Selectors.ConfirmationModal);
-        await deleteModal.waitForDisplayed();
-        await browser.clickVisible(Selectors.confirmationModalConfirmButton());
-        await renameModal.waitForDisplayed({ reverse: true });
+        await browser.clickConfirmationAction(
+          Selectors.SavedItemMenuItemDelete
+        );
       });
 
       it('opens a saved aggregation', async function () {
@@ -368,7 +366,7 @@ describe('My Queries tab', function () {
         // copy to clipboard
         await browser.clickVisible(Selectors.SavedItemMenuItemCopy);
 
-        if (process.env.COMPASS_E2E_DISABLE_CLIPBOARD_USAGE !== 'true') {
+        if (!runnerContext.disableClipboardUsage) {
           await browser.waitUntil(
             async () => {
               const text = (await clipboard.read())

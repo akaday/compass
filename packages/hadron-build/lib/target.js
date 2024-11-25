@@ -333,8 +333,9 @@ class Target {
     /**
      * Remove `.` from version tags for NUGET version
      */
+    const safeChannel = _.escapeRegExp(this.channel);
     const nuggetVersion = this.version.replace(
-      new RegExp(`-${this.channel}\\.(\\d+)`),
+      new RegExp(`-${safeChannel}\\.(\\d+)`),
       `-${this.channel}$1`
     );
 
@@ -623,8 +624,11 @@ class Target {
         );
       }
 
-      const createDMG = require('electron-installer-dmg');
-      await createDMG(this.installerOptions);
+      const { createDMG } = require('electron-installer-dmg');
+      // electron-installer-dmg rejects setting both .dmgPath and .out
+      const installerOptions = { ...this.installerOptions };
+      delete installerOptions.out;
+      await createDMG(installerOptions);
 
       if (isNotarizationPossible) {
         await notarize(this.installerOptions.dmgPath, notarizationOptions);

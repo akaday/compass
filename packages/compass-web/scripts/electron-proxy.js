@@ -2,6 +2,7 @@
 // @ts-check
 const express = require('express');
 const proxyMiddleware = require('express-http-proxy');
+const RateLimit = require('express-rate-limit');
 const { once } = require('events');
 const {
   app: electronApp,
@@ -168,14 +169,11 @@ class AtlasCloudAuthenticator {
   }
 
   async getCloudHeaders() {
-    // Order is important, fetching data can update the cookies
-    const csrfHeaders = await this.#getCSRFHeaders();
     const cookie = (await this.#getCloudSessionCookies()).join('; ');
     return {
       cookie,
       host: CLOUD_HOST,
       origin: CLOUD_ORIGIN,
-      ...csrfHeaders,
     };
   }
 
@@ -355,9 +353,15 @@ class AtlasCloudAuthenticator {
 
 const atlasCloudAuthenticator = new AtlasCloudAuthenticator();
 
+// Configure rate limiter: maximum of 100 requests per 15 minutes
+const limiter = RateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // max 100 requests per windowMs
+});
+
 // Proxy endpoint that triggers the sign in flow through configured cloud
 // environment
-expressProxy.use('/authenticate', async (req, res) => {
+expressProxy.use('/authenticate', limiter, async (req, res) => {
   if (req.method !== 'POST') {
     res.statusCode = 400;
     res.end();
@@ -379,7 +383,7 @@ expressProxy.use('/authenticate', async (req, res) => {
   res.end();
 });
 
-expressProxy.use('/logout', async (req, res) => {
+expressProxy.use('/logout', limiter, async (req, res) => {
   if (req.method !== 'GET') {
     res.statusCode = 400;
     res.end();
@@ -391,7 +395,7 @@ expressProxy.use('/logout', async (req, res) => {
   res.end();
 });
 
-expressProxy.use('/x509', async (req, res) => {
+expressProxy.use('/x509', limiter, async (req, res) => {
   if (req.method !== 'GET') {
     res.statusCode = 400;
     res.end();
@@ -410,7 +414,7 @@ expressProxy.use('/x509', async (req, res) => {
   res.end();
 });
 
-expressProxy.use('/projectId', async (req, res) => {
+expressProxy.use('/projectId', limiter, async (req, res) => {
   if (req.method !== 'GET') {
     res.statusCode = 400;
     res.end();
@@ -542,6 +546,11 @@ function cleanupAndExit() {
 }
 
 electronApp.whenReady().then(async () => {
+  // Create an empty browser window so that webdriver session can be
+  // immediately get attached to something without failing
+  const emptyBrowserWindow = new BrowserWindow({ show: false });
+  emptyBrowserWindow.loadURL('about:blank');
+
   electronApp.on('window-all-closed', () => {
     // We want proxy to keep running even when all the windows are closed, but
     // hide the dock icon because there are not windows associated with it

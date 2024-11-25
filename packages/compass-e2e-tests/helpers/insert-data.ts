@@ -1,6 +1,7 @@
 import { MongoClient } from 'mongodb';
 import type { Db, MongoServerError } from 'mongodb';
 import { DEFAULT_CONNECTION_STRINGS } from './test-runner-context';
+import { redactConnectionString } from 'mongodb-connection-string-url';
 
 // This is a list of all the known database names that get created by tests so
 // that we can know what to drop when we clean up before every test. If a new
@@ -55,10 +56,14 @@ export const beforeAll = async () => {
 
   await Promise.all(clients.map((client) => client.connect()));
 
+  const connectionsForPrinting = connectionStrings
+    .map((str) => {
+      return redactConnectionString(str);
+    })
+    .join(' and ');
+
   console.log(
-    `Connected successfully to ${connectionStrings.join(
-      ' and '
-    )} for inserting data`
+    `Connected successfully to ${connectionsForPrinting} for inserting data`
   );
 
   test_dbs = clients.map((client) => client.db('test'));
@@ -163,13 +168,15 @@ export async function createNumbersStringCollection(
   );
 }
 
-export async function createGeospatialCollection(): Promise<void> {
+export async function createGeospatialCollection(
+  name = 'geospatial'
+): Promise<void> {
   await Promise.all(
     test_dbs.map(async (db) => {
       const lon = () => Math.random() * 360 - 180;
       const lat = () => Math.random() * 180 - 90;
 
-      await db.collection('geospatial').insertMany(
+      await db.collection(name).insertMany(
         [...Array(1000).keys()].map(() => ({
           location: { type: 'Point', coordinates: [lon(), lat()] },
         }))

@@ -12,12 +12,18 @@ console.info(
 
 type SignInStatus = 'checking' | 'signed-in' | 'signed-out';
 
+type ProjectParams = {
+  projectId: string;
+  csrfToken: string;
+  csrfTime: string;
+};
+
 type AtlasLoginReturnValue =
   | {
       status: 'checking' | 'signed-out';
-      projectId: null;
+      projectParams: null;
     }
-  | { status: 'signed-in'; projectId: string };
+  | { status: 'signed-in'; projectParams: ProjectParams };
 
 const bodyContainerStyles = css({
   display: 'flex',
@@ -55,9 +61,18 @@ function ToastBodyWithAction({
   );
 }
 
+const IS_CI =
+  process.env.ci ||
+  process.env.CI ||
+  process.env.IS_CI ||
+  process.env.NODE_ENV === 'test' ||
+  process.env.APP_ENV === 'webdriverio';
+
 export function useAtlasProxySignIn(): AtlasLoginReturnValue {
   const [status, setStatus] = useState<SignInStatus>('checking');
-  const [projectId, setProjectId] = useState<string | null>(null);
+  const [projectParams, setProjectParams] = useState<ProjectParams | null>(
+    null
+  );
 
   const signIn = ((window as any).__signIn = useCallback(async () => {
     try {
@@ -97,8 +112,16 @@ export function useAtlasProxySignIn(): AtlasLoginReturnValue {
           if (!projectId) {
             throw new Error('failed to get projectId');
           }
-          setProjectId(projectId);
+          const { csrfToken, csrfTime } = await fetch(
+            `/cloud-mongodb-com/v2/${projectId}/params`
+          ).then((res) => {
+            return res.json();
+          });
+          setProjectParams({ projectId, csrfToken, csrfTime });
           setStatus('signed-in');
+          if (IS_CI) {
+            return;
+          }
           openToast('atlas-proxy', {
             title: 'Signed in to local Atlas Cloud proxy',
             description: (
@@ -116,13 +139,7 @@ export function useAtlasProxySignIn(): AtlasLoginReturnValue {
       .catch(() => {
         if (mounted) {
           setStatus('signed-out');
-          if (
-            process.env.ci ||
-            process.env.CI ||
-            process.env.IS_CI ||
-            process.env.NODE_ENV === 'test' ||
-            process.env.APP_ENV === 'webdriverio'
-          ) {
+          if (IS_CI) {
             return;
           }
           openToast('atlas-proxy', {
@@ -147,12 +164,12 @@ export function useAtlasProxySignIn(): AtlasLoginReturnValue {
   if (status === 'checking' || status === 'signed-out') {
     return {
       status,
-      projectId: null,
+      projectParams: null,
     };
   }
 
-  if (status === 'signed-in' && projectId) {
-    return { status, projectId };
+  if (status === 'signed-in' && projectParams) {
+    return { status, projectParams };
   }
 
   throw new Error('Weird state, ask for help in Compass dev channel');
