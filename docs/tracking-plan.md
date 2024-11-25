@@ -1,4 +1,3 @@
-
 # Compass Tracking Plan
 
 Generated on Sun, Nov 24, 2024 at 03:33 AM
