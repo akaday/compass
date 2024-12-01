@@ -111,7 +111,6 @@ export class CompassAuthService {
       // internal plugin auth state), we copy oidc-plugin `openBrowser.command`
       // option handling to our openExternal method
       const child = spawn(browserCommandForOIDCAuth, [url], {
-        shell: true,
         stdio: 'ignore',
         detached: true,
       });
