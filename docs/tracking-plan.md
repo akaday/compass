@@ -1,4 +1,3 @@
-
 # Compass Tracking Plan
 
 Generated on Thu, Dec 12, 2024 at 05:32 PM
@@ -1974,6 +1973,5 @@ See: https://web.dev/articles/vitals.
 
 - **value** (required): `number`
   - The reported metric value.
-
 
 
