@@ -401,8 +401,9 @@ expressProxy.use('/x509', async (req, res) => {
     res.setHeader('Content-Type', 'text/plain');
     res.send(cert);
   } catch (err) {
+    console.error("Error in /x509 route:", err.stack ?? err.message);
     res.statusCode = 500;
-    res.send(err.stack ?? err.message);
+    res.send("An internal server error occurred.");
   }
   res.end();
 });
@@ -423,8 +424,9 @@ expressProxy.use('/projectId', async (req, res) => {
       res.send(projectId);
     }
   } catch (err) {
+    console.error("Error in /projectId route:", err.stack ?? err.message);
     res.statusCode = 500;
-    res.send(err.stack ?? err.message);
+    res.send("An internal server error occurred.");
   }
   res.end();
 });
