@@ -72,9 +72,9 @@
     "@testing-library/dom": "^8.20.1",
     "husky": "^8.0.3",
     "js-yaml": "^4.1.0",
-    "lerna": "^7.1.5",
+    "lerna": "^9.0.7",
     "lodash": "^4.17.21",
-    "node-gyp": "^10.2.0"
+    "node-gyp": "^12.2.0"
   },
   "engines": {
     "node": ">=20.15.0",
